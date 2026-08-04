@@ -3,6 +3,7 @@ import { Geist_Mono, Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { QueryProvider } from "@/providers/query-provider"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const geistMonoHeading = Geist_Mono({
@@ -35,6 +36,7 @@ export default function RootLayout({
       )}
     >
       <body>
+        <Analytics />
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>

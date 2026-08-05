@@ -42,7 +42,7 @@ const QuestionScreen = ({
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center p-6">
-      <div className="w-1/2">
+      <div className="w-full md:w-1/2">
         <Progress
           value={((steps - 1) / questions.length) * 100}
           className="w-full"
@@ -54,7 +54,7 @@ const QuestionScreen = ({
         </Progress>
       </div>
 
-      <div className="mt-6 flex w-1/2 flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 pt-6 shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <div className="mt-6 flex w-full flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 pt-6 shadow-md md:w-1/2 dark:border-gray-700 dark:bg-gray-800">
         <Field>
           <FieldLabel htmlFor={`answer-${steps - 2}`}>
             <h2 className="text-lg font-semibold">{questions[steps - 2]}</h2>
@@ -135,7 +135,7 @@ const QuestionScreen = ({
         </Field>
       </div>
 
-      <div className="flex w-1/2 items-center justify-between py-4">
+      <div className="flex w-full items-center justify-between py-4 md:w-1/2">
         <Button className="h-10" variant="outline" onClick={onBack}>
           Atrás
         </Button>

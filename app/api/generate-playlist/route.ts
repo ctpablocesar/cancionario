@@ -92,8 +92,8 @@ export async function POST(req: NextRequest) {
     const accessToken = await getUserAccessToken()
     const playlist = await createPlaylist(accessToken, name)
 
-    const uniqueUris = [...new Set(tracks.map((t) => t.uri))]
-    await addTracks(accessToken, playlist.id, uniqueUris)
+    const uris = tracks.map((t) => t.uri)
+    await addTracks(accessToken, playlist.id, uris)
 
     return NextResponse.json({
       playlistUrl: playlist.external_urls.spotify,

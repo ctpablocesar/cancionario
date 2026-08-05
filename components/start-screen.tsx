@@ -20,7 +20,7 @@ const StartScreen = ({
           Bienvenido al cancionario
         </h1>
       </div>
-      <div className="mt-6 flex w-1/2 flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 pt-6 shadow-md dark:border-gray-700 dark:bg-gray-800">
+      <div className="mt-6 flex w-full flex-col gap-3 rounded-lg border border-gray-300 bg-white p-4 pt-6 shadow-md md:w-1/2 dark:border-gray-700 dark:bg-gray-800">
         <Field>
           <FieldLabel htmlFor="name">Tu nombre</FieldLabel>
           <Input

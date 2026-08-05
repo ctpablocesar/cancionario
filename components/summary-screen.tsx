@@ -28,7 +28,7 @@ const SummaryScreen = ({
         Puedes editar cualquiera antes de guardar
       </p>
 
-      <div className="mt-6 flex w-1/2 flex-col gap-3">
+      <div className="mt-6 flex w-full flex-col gap-3 md:w-1/2">
         {questions.map((question, index) => {
           const track = answers[index]
 
@@ -82,7 +82,7 @@ const SummaryScreen = ({
         })}
       </div>
 
-      <div className="mt-6 w-1/2 pb-6">
+      <div className="mt-6 w-full pb-6 md:w-1/2">
         <Button
           className="w-full"
           disabled={!allAnswered || isSaving}

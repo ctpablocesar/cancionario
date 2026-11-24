@@ -1,11 +1,13 @@
 "use client"
+
 import DoneScreen from "@/components/done-screen"
 import QuestionScreen from "@/components/question-screen"
 import StartScreen from "@/components/start-screen"
 import SummaryScreen from "@/components/summary-screen"
 import { useGeneratePlaylist } from "@/hooks/use-generate-playlist"
 import type { Track } from "@/lib/api/tracks"
-import { useState } from "react"
+import { sideFor } from "@/lib/mixtape"
+import { useEffect, useState } from "react"
 
 const QUESTIONS: string[] = [
   "Tu canción de amor favorita",
@@ -27,80 +29,124 @@ const SUMMARY_STEP = QUESTIONS.length + 2
 const DONE_STEP = QUESTIONS.length + 3
 
 export default function Page() {
-  const [steps, setSteps] = useState(START_STEP)
+  const [step, setStep] = useState(START_STEP)
   const [name, setName] = useState("")
   const [answers, setAnswers] = useState<Record<number, Track>>({})
-  const [isSaving, setIsSaving] = useState(false)
-  const { mutate: generatePlaylist, isPending, data } = useGeneratePlaylist()
+  const { mutate, isPending, data, error, reset } = useGeneratePlaylist()
 
-  const currentQuestionIndex = steps - FIRST_QUESTION_STEP
+  const currentQuestionIndex = step - FIRST_QUESTION_STEP
   const isLastQuestion = currentQuestionIndex === QUESTIONS.length - 1
+  const answeredCount = Object.keys(answers).length
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [step])
+
+  useEffect(() => {
+    const isFilling = step >= FIRST_QUESTION_STEP && step < DONE_STEP
+    if (!isFilling) return
+
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault()
+      event.returnValue = ""
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [step])
 
   const handleStart = () => {
     if (!name.trim()) return
-    setSteps(FIRST_QUESTION_STEP)
+    setStep(FIRST_QUESTION_STEP)
   }
 
   const handleNext = () => {
     if (isLastQuestion) {
-      setSteps(SUMMARY_STEP)
+      setStep(SUMMARY_STEP)
     } else {
-      setSteps((s) => s + 1)
+      setStep((current) => current + 1)
     }
   }
 
   const handleBack = () => {
-    if (steps === FIRST_QUESTION_STEP) {
-      setSteps(START_STEP)
+    if (step === FIRST_QUESTION_STEP) {
+      setStep(START_STEP)
     } else {
-      setSteps((s) => s - 1)
+      setStep((current) => current - 1)
     }
   }
 
   const handleEdit = (index: number) => {
-    setSteps(index + FIRST_QUESTION_STEP)
+    setStep(index + FIRST_QUESTION_STEP)
+  }
+
+  const handleClearAnswer = (index: number) => {
+    setAnswers((previous) => {
+      const next = { ...previous }
+      delete next[index]
+      return next
+    })
   }
 
   const handleSave = () => {
-    const tracks = Object.values(answers)
-    generatePlaylist(
-      { name: `Cancionario - ${name}`, tracks },
-      { onSuccess: () => setSteps(DONE_STEP) }
-    )
+    if (isPending) return
+    if (error) reset()
+
+    mutate({
+      name: `Cancionario de ${name.trim()}`,
+      tracks: Object.values(answers),
+    })
   }
 
   return (
     <>
-      {steps === START_STEP && (
+      {step === START_STEP && (
         <StartScreen name={name} onNameChange={setName} onStart={handleStart} />
       )}
 
-      {steps >= FIRST_QUESTION_STEP && steps < SUMMARY_STEP && (
+      {step >= FIRST_QUESTION_STEP && step < SUMMARY_STEP && (
         <QuestionScreen
-          steps={steps}
-          questions={QUESTIONS}
+          key={currentQuestionIndex}
+          question={QUESTIONS[currentQuestionIndex]}
+          index={currentQuestionIndex}
+          total={QUESTIONS.length}
+          side={sideFor(currentQuestionIndex, QUESTIONS.length)}
           selectedTrack={answers[currentQuestionIndex] ?? null}
           onSelectTrack={(track) =>
-            setAnswers((prev) => ({ ...prev, [currentQuestionIndex]: track }))
+            setAnswers((previous) => ({
+              ...previous,
+              [currentQuestionIndex]: track,
+            }))
           }
+          onClearTrack={() => handleClearAnswer(currentQuestionIndex)}
           onNext={handleNext}
           onBack={handleBack}
           isLastQuestion={isLastQuestion}
         />
       )}
 
-      {steps === SUMMARY_STEP && (
+      {step === SUMMARY_STEP && (
         <SummaryScreen
           questions={QUESTIONS}
           answers={answers}
+          name={name.trim()}
           onEdit={handleEdit}
           onSave={handleSave}
-          isSaving={isSaving}
+          isPending={isPending}
+          errorMessage={
+            error
+              ? "No se pudo grabar la playlist. Revisa tu conexión e intenta de nuevo."
+              : null
+          }
         />
       )}
 
-      {steps === DONE_STEP && data && (
-        <DoneScreen playlistUrl={data.playlistUrl} />
+      {step === DONE_STEP && data && (
+        <DoneScreen
+          playlistUrl={data.playlistUrl}
+          name={name.trim()}
+          trackCount={answeredCount}
+        />
       )}
     </>
   )

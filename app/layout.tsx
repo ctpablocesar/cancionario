@@ -1,4 +1,5 @@
-import { Geist_Mono, Inter } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Archivo, Caveat } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
@@ -6,17 +7,29 @@ import { QueryProvider } from "@/providers/query-provider"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const geistMonoHeading = Geist_Mono({
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-heading",
+  axes: ["wdth"],
+  variable: "--font-archivo",
 })
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
-
-const fontMono = Geist_Mono({
+const caveat = Caveat({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-caveat",
 })
+
+export const metadata: Metadata = {
+  title: "Cancionario · el mixtape de tus amigos",
+  description:
+    "Responde cada pregunta con una canción y al final todas se graban en una playlist de Spotify.",
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e9ecf2" },
+    { media: "(prefers-color-scheme: dark)", color: "#12162a" },
+  ],
+}
 
 export default function RootLayout({
   children,
@@ -25,15 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable,
-        geistMonoHeading.variable
-      )}
+      className={cn("antialiased", archivo.variable, caveat.variable)}
     >
       <body>
         <Analytics />
